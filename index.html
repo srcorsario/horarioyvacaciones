@@ -179,7 +179,7 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
 .prow{grid-template-columns:minmax(0,1fr) auto auto 26px}
 .prow>span:empty{display:none}
 .pcatx{font-size:12px;color:var(--muted);white-space:nowrap}
-.pzonex{font:500 11px var(--mono);color:var(--muted);min-width:18px;text-align:center}
+.pzonex{font:500 11px var(--mono);color:var(--muted);min-width:18px;text-align:center;white-space:nowrap}
 
 @media (max-width:700px){
   .app{padding-block:12px 32px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
@@ -339,8 +339,10 @@ ROWS.forEach((r,i)=>{
 });
 
 const defCfg=()=>({cats:[{id:'c1',name:'Responsables',color:PALETTE[0],grp:'A'},{id:'c2',name:'Jefes',color:PALETTE[1],grp:'A'},{id:'c3',name:'Camareros',color:PALETTE[2]},{id:'c4',name:'Ayudantes',color:PALETTE[3]}],me:'',carry:'Pedro'});
-const ZN={RG:'RG',PR:'Players Rest'};
-const zOk=p=>!S.zone||(S.zone==='-'?!p.z:p.z===S.zone);
+let ZN={RG:'RG',PR:'Players Rest'}, ZL=[{k:'RG',n:'RG'},{k:'PR',n:'Players Rest'}];
+const zl=p=>p&&p.z?(Array.isArray(p.z)?p.z:[p.z]):[];
+const zname=p=>zl(p).map(k=>ZN[k]||k).join(' + ');
+const zOk=p=>!S.zone||(S.zone==='-'?!zl(p).length:zl(p).includes(S.zone));
 const zOpts=v=>`<option value="">—</option>${Object.entries(ZN).map(([k,n])=>`<option value="${k}"${k===v?' selected':''} title="${n}">${k==='PR'?'PR':n}</option>`).join('')}`;
 const S={zone:'',people:{},weeks:{},cfg:defCfg(),got:{p:0,w:0,c:0},loaded:false,canWrite:false,mode:'loading',focus:null,confirm:null,view:'',hmap:{},draft:null,open:{}};
 let db=null,dl=null,chain=Promise.resolve();
@@ -526,6 +528,7 @@ function catOptions(sel){return S.cfg.cats.map(c=>`<option value="${c.id}"${c.id
 
 function renderPanel(){
   const st=stats(), ro=!S.canWrite, ps=people();
+  const zf=$('#zf');if(zf){const o='<option value="">Todas</option>'+ZL.map(z=>`<option value="${esc(z.k)}">${esc(z.n)}</option>`).join('')+'<option value="-">Sin zona</option>';if(zf.dataset.sig!==o){zf.innerHTML=o;zf.dataset.sig=o;}zf.value=S.zone;if(zf.value!==S.zone)S.zone='';}
   $('#free').textContent=S.loaded?st.free:'–';
   $('#freeSub').textContent=S.loaded?`de ${st.total} semanas disponibles${st.blocked?' · '+st.blocked+' bloqueadas':''}`:'';
   let h;
@@ -535,7 +538,7 @@ function renderPanel(){
   else h=ps.filter(zOk).map(p=>{
     const c=cat(p.cat);
     const del=ro?'<span></span>':(S.confirm===p.id?`<button class="del sure" data-act="del2" data-id="${p.id}">¿Eliminar?</button>`:`<button class="del" data-act="del" data-id="${p.id}" aria-label="Eliminar a ${esc(p.name)}">×</button>`);
-    return `<li class="prow${S.focus===p.id?' on':''}"><button class="pname" data-act="focus" data-id="${p.id}" aria-pressed="${S.focus===p.id}"><i style="background:${c.color}"></i><span>${esc(p.name)}</span></button>${S.confirm===p.id?'':`<span class="pcatx">${esc(c.name)}</span><span class="pzonex">${p.z||''}</span><b class="cnt">${st.cnt[p.id]}</b>`}${del}</li>`;
+    return `<li class="prow${S.focus===p.id?' on':''}"><button class="pname" data-act="focus" data-id="${p.id}" aria-pressed="${S.focus===p.id}"><i style="background:${c.color}"></i><span>${esc(p.name)}</span></button>${S.confirm===p.id?'':`<span class="pcatx">${esc(c.name)}</span><span class="pzonex">${esc(zl(p).join('+'))}</span><b class="cnt">${st.cnt[p.id]}</b>`}${del}</li>`;
   }).join('');
   $('#people').innerHTML=h;
   const pc=$('#pc'),v=pc.value; pc.innerHTML=catOptions(v);
@@ -557,11 +560,11 @@ function renderPanel(){
 function renderView(){
   if(S.view&&S.loaded&&!S.people[S.view])S.view='';
   const sel=$('#view');
-  sel.innerHTML=people().map(p=>`<option value="${p.id}"${schedOf(p)?'':' disabled'}>${esc(p.name)}${p.z?' - '+ZN[p.z]:''}${schedOf(p)?'':' (sin horario definido)'}</option>`).join('');
+  sel.innerHTML=people().map(p=>`<option value="${p.id}"${schedOf(p)?'':' disabled'}>${esc(p.name)}${zl(p).length?' - '+zname(p):''}${schedOf(p)?'':' (sin horario definido)'}</option>`).join('');
   const cv=curView();sel.value=cv;
   const p=S.people[cv];
   const sc=schedOf(p);const cvr=p&&p.cover&&S.people[p.cover]&&sc&&sc.k==='fx'?` Cubre a ${S.people[p.cover].name} en sus semanas de vacaciones: libre sá y do.`:'';
-  $('#pwho').textContent=p?'Horario de '+p.name+(p.z?' · '+ZN[p.z]:''):'';
+  $('#pwho').textContent=p?'Horario de '+p.name+(zl(p).length?' · '+zname(p):''):'';
   $('#viewNote').textContent=p?`Las franjas rojas marcan sus semanas de vacaciones.${cvr}`:'';
 }
 
@@ -677,7 +680,7 @@ $('#exp').addEventListener('click',async()=>{
 });
 
 /* ---------- arranque (solo lectura desde Google Sheets) ---------- */
-const API='https://script.google.com/macros/s/AKfycbx90Rn12jnMtu8UknVF4SgNN6XYkhhGS1m-aBtZlicQ5ID-b4dORJWgMUmnYZN8MNRArQ/exec';
+const API='https://script.google.com/macros/s/AKfycbz25VTHOIQ3ffPS99CrWHlIic9DAFz567CdID6MTZ_BIbNhG1tYf_giRKp71DBqYBZNiA/exec';
 let last='';
 async function load(){
   try{
@@ -691,6 +694,7 @@ async function load(){
     const d0=new Date();S.stamp=pad(d0.getHours())+':'+pad(d0.getMinutes());
     if(sig!==last||!S.loaded){
       last=sig;
+      const zs=(d.cfg&&d.cfg.zones)||[];if(zs.length){ZL=zs;ZN={};zs.forEach(z=>ZN[z.k]=z.n);}
       S.people=d.people||{};S.weeks=d.weeks||{};S.cfg=Object.assign(defCfg(),d.cfg||{});
       S.loaded=true;S.mode='shared';
       render();
