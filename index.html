@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<!doctype html><html lang="es" data-theme="light" style="color-scheme:light"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <title>Calendario Laboral 2027</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="icon" href="favicon.ico" sizes="any"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
@@ -363,6 +363,82 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 @media (max-width:1000px){#pdlg .db{display:block;overflow-y:auto}#pdlg .db>div{overflow:visible}#pdlg .db>div+div{border-left:0;border-top:1px solid var(--line)}}
 #viewEd{height:32px}
 @media print{#viewEd{display:none!important}}
+@media (max-width:640px){
+  .app{padding-block:12px 32px}
+  h1{font-size:30px}
+  header{margin-bottom:12px}
+  header>div:last-child{width:100%}
+  .viewbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+  .viewbar label{grid-column:1/-1}
+  #view{min-width:0;width:100%}
+  .vnote{grid-column:1/-1}
+  .legend{gap:4px 10px;font-size:11px}
+  td,th{height:30px}
+  .vac{padding:2px 4px}
+  .vin{gap:3px}
+  .chip{font-size:11px;padding:0 2px 0 6px;gap:3px}
+  .chip button{width:20px;height:20px;line-height:20px}
+  .vadd{height:22px;width:26px;padding:0;font-size:0}
+  .vadd::before{content:"+";font-size:15px;line-height:20px}
+  .lock{display:none}
+  .panel .card{padding:12px}
+  #vdlg,#sdlg,#pdlg{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0;margin:0}
+  #vdlg .ch{grid-template-columns:36px minmax(0,1fr) 36px;font-size:15px;padding:8px 10px}
+  #vdlg .ch button{width:36px;height:36px}
+  #vdlg .ch small .rl{display:none}
+  #vdlg .cf{flex-wrap:wrap}
+  #vdlg .cf div{flex:1;justify-content:flex-end}
+  #vdlg .vg{grid-template-columns:1fr}
+  #sdlg .sh{padding:8px 10px}
+  #sdlg .sh h3{font-size:20px}
+  #sdlg .sg{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .schb.sc2{padding:6px 8px}
+  .schb.sc2 b{font-size:13px}
+  .schb.sc2 .m{font-size:11px}
+  #pdlg .dh{grid-template-columns:36px minmax(0,1fr) 36px 36px;padding:8px 10px}
+  #pdlg .dh h3{font-size:16px}
+  #pdlg .c1 .days{flex-direction:row;flex-wrap:wrap}
+  #pdlg .cw{grid-template-columns:40px repeat(7,minmax(0,1fr))}
+  #pdlg .c2 .cs{font-size:10px}
+}
+#wdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:calc(100vw - 32px);max-width:1500px;height:calc(100dvh - 32px);max-height:none;overflow:hidden}
+#wdlg[open]{display:flex;flex-direction:column}#wdlg::backdrop{background:rgba(10,15,22,.5)}
+#wdlg .wh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px;border-bottom:1px solid var(--line)}
+#wdlg .wh h3{margin:0;font:800 20px var(--display)}
+#wdlg .wh select{height:34px;border:1px solid var(--line);border-radius:6px;padding:0 8px;background:var(--surface);color:var(--ink);font-size:13px}
+#wdlg .wh .x{all:unset;cursor:pointer;margin-left:auto;width:36px;height:36px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;font-size:20px}
+#wdlg .wz{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line)}
+#wdlg .wb{flex:1;min-height:0;overflow:auto;padding:14px;background:var(--off)}
+#wdlg .wb .wsheet{background:#fff;padding:10mm;max-width:297mm;margin:0 auto;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#wdlg .wf{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+#wdlg .wf span{font-size:12px;color:var(--muted)}
+.wsheet{color:#000;font-family:var(--sans)}
+.wsheet h2{all:unset;display:block;text-align:center;font:800 15pt var(--display);color:#000}
+.wsheet .wsub{text-align:center;font-size:9pt;margin:1mm 0 3mm;color:#333}
+.wsheet table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:7.1pt}
+.wsheet th,.wsheet td{border:.6px solid #999;height:auto;padding:1.1mm .8mm;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsheet thead th{position:static;background:#bdbdbd;color:#000;font:700 8pt var(--sans);letter-spacing:0;text-transform:none;text-align:center;border-bottom:.6px solid #999}
+.wsheet thead th:first-child{text-align:left;width:19%}
+.wsheet thead th small{display:block;font-weight:500;font-size:6.5pt}
+.wsheet td.nm{font-weight:600;background:#e6e6e6}
+.wsheet tr.zr td{background:#141C26;color:#fff;font:700 8pt var(--sans);letter-spacing:.06em}
+.wsheet td.k-l{background:#d4d4d4;color:#222}
+.wsheet td.k-v{background:#fff;color:#C8283C;font-weight:700}
+.wsheet td.k-w,.wsheet td.k-e{background:#fff}
+.wsheet td.k-m{background:#C6DAF3}.wsheet td.k-n{background:#F3D6DB}.wsheet td.k-x{background:#CDEBD5}.wsheet td.k-y{background:#DDD5F3}.wsheet td.k-z{background:#FBDDBF}
+.wsheet td.cv{font-style:italic}
+.wsheet .wnote{font:700 7.5pt var(--sans);margin-top:3mm}
+.wsheet .wnote small{display:block;font-weight:400;font-style:italic;color:#444;margin-top:1mm}
+.wsheet .pb{break-after:page}
+#wprint{display:none}
+@page wk{size:A4 landscape;margin:8mm}
+@media print{
+  body.pw .app,body.pw #toast{display:none!important}
+  body.pw #wprint{display:block!important;page:wk}
+  body.pw #wprint .wsheet{padding:0}
+  .wsheet tr{break-inside:avoid}
+  .wsheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head><body>
 <div class="app">
@@ -373,7 +449,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
       <p class="disc" id="disc">Calendario orientativo, sin carácter oficial. Los horarios y las vacaciones válidos son los que publica la empresa.</p>
       <div class="pwho" id="pwho"></div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center"><button class="btn ghost edonly" id="logout" type="button">Salir</button><button class="btn ghost" id="print" type="button">Imprimir A4</button><span class="status" id="status" role="status">Cargando…</span></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn ghost edonly" id="logout" type="button">Salir</button><button class="btn ghost edonly" type="button" data-act="wdlg">Horario semana…</button><button class="btn ghost" id="print" type="button">Imprimir A4</button><span class="status" id="status" role="status">Cargando…</span></div>
   </header>
 
   <div class="layout">
@@ -436,6 +512,8 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 
       </aside></div></dialog>
 <dialog id="pdlg" aria-labelledby="pdlgT"></dialog>
+<dialog id="wdlg" aria-labelledby="wdlgT"></dialog>
+<div id="wprint"></div>
 <dialog id="cdlg" aria-labelledby="cdlgT"></dialog>
 <dialog id="vdlg" aria-labelledby="vdlgT"></dialog>
 <dialog id="ldlg" class="lg" aria-labelledby="ldlgT"><form id="lform"><h3 id="ldlgT">Editor</h3><label>Usuario<input id="lu" autocomplete="username" required></label><label>Contraseña<input id="lp" type="password" autocomplete="current-password" required></label><p class="err" id="lerr"></p><div class="row"><button type="button" class="btn ghost" id="lcancel">Solo ver</button><button class="btn" id="lok">Entrar</button></div></form></dialog>
@@ -826,7 +904,7 @@ function openVac(n){
   S.vn=n;S.vsel=new Set(wk(n).p.filter(i=>S.people[i]));S.vq='';
   const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1);
   const dg=$('#vdlg');
-  dg.innerHTML=`<div class="ch"><button type="button" data-act="vprev" aria-label="Semana anterior"${n<=2?' disabled':''}>‹</button><div id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona. Quien cubre a otros y sus cubiertos no pueden coincidir entre sí (de cualquier categoría) y van aparte del resto.</small></div><button type="button" data-act="vnext" aria-label="Semana siguiente"${n>=53?' disabled':''}>›</button></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
+  dg.innerHTML=`<div class="ch"><button type="button" data-act="vprev" aria-label="Semana anterior"${n<=2?' disabled':''}>‹</button><div id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y}<span class="rl"> · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona. Quien cubre a otros y sus cubiertos no pueden coincidir entre sí (de cualquier categoría) y van aparte del resto.</span></small></div><button type="button" data-act="vnext" aria-label="Semana siguiente"${n>=53?' disabled':''}>›</button></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
   renderVac();
   if(!dg.open){try{dg.showModal();}catch(e){dg.setAttribute('open','');}}
   const q=$('#vq');if(q)q.focus();
@@ -846,6 +924,51 @@ function renderVac(){
 }
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.vp)return;e.stopImmediatePropagation();if(t.checked)S.vsel.add(t.dataset.vp);else S.vsel.delete(t.dataset.vp);renderVac();},true);
 document.addEventListener('input',e=>{if(e.target.id==='vq'){S.vq=e.target.value;renderVac();}else if(e.target.id==='sq'){S.sq=e.target.value;renderPanel();}});
+const ZPRE={RG:'RG',PR:'COMEDOR',CH:'CH',CAF:'CAF',WB:'WB',US:'US_OP',DRG:'REST'};
+function dayCells(p,n){
+  const w=n===1?{p:[]}:wk(n),raw=S.people[p.id];
+  if(w.p.includes(p.id))return Array(7).fill({t:'VACACIONES',k:'v'});
+  const x=subOf(raw,n),s=x?x.s:schedOf(raw),zq=x?x.q:p,cv=!!x;
+  if(!s)return Array(7).fill({t:'',k:'e'});
+  const pre=ZPRE[zs(zq)[0]]||'',hm=t=>String(t||'').replace(':',''),lab=(f,t)=>(pre?pre+'_':'')+hm(f)+'_'+hm(t);
+  const D={t:'DESCANSO',k:'l'};
+  if(s.k==='rot')return weekPat(s,n).split('').map(c=>c==='l'?D:c==='w'?{t:'',k:'w'}:{t:c==='m'?lab(s.mf,s.mt):c==='n'?lab(s.nf,s.nt):c==='x'?lab(s.from,s.to):c==='y'?lab(s.from2,s.to2):lab(s.from3,s.to3),k:c,cv});
+  return [0,1,2,3,4,5,6].map(d=>s.free.includes(d)?D:{t:lab(s.from,s.to),k:'x',cv});
+}
+function weekSheet(n,zones,split){
+  const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1)+'/'+d.y,DN=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const gs=groups(people()).filter(g=>zones.includes(g.k));
+  const head=`<thead><tr><th>Nombre trabajador</th>${r.days.map((d,i)=>`<th>${fd(d)}<small>${DN[i]}</small></th>`).join('')}</tr></thead>`;
+  const body=g=>`<tr class="zr"><td colspan="8">${esc(zName(g.k).toUpperCase())}</td></tr>`+g.ps.map(p=>`<tr><td class="nm" title="${esc(p.name)}">${esc(p.name.toUpperCase())}</td>${dayCells(p,n).map(c=>`<td class="k-${c.k}${c.cv?' cv':''}">${esc(c.t)}</td>`).join('')}</tr>`).join('');
+  const title=`<h2>Horario semana ${r.label}</h2><div class="wsub">${fd(r.days[0])} – ${fd(r.days[6])}</div>`;
+  const note=`<div class="wnote">NOTA: LOS HORARIOS PUEDEN SUFRIR CAMBIOS DEBIDO A LA OCUPACIÓN, EVENTOS O CARGA DE TRABAJO<small>Horario teórico generado a partir del Calendario Laboral 2027. En cursiva, turnos de cobertura de vacaciones.</small></div>`;
+  if(!gs.length)return '<div class="wsheet"><p>No hay personas en las zonas elegidas.</p></div>';
+  if(split)return gs.map((g,i)=>`<div class="wsheet${i<gs.length-1?' pb':''}">${title}<table>${head}<tbody>${body(g)}</tbody></table>${note}</div>`).join('');
+  return `<div class="wsheet">${title}<table>${head}<tbody>${gs.map(body).join('')}</tbody></table>${note}</div>`;
+}
+function curWeekN(){const t=new Date(),u=Date.UTC(t.getFullYear(),t.getMonth(),t.getDate());const i=Math.floor((u-START)/DAY/7)+1;return Math.min(53,Math.max(1,i));}
+function openWeek(){
+  if(!S.wn)S.wn=curWeekN();if(!S.wz)S.wz=[...ZK];
+  const dg=$('#wdlg'),fd=d=>pad(d.num)+'/'+pad(d.mo+1);
+  dg.innerHTML=`<div class="wh"><h3 id="wdlgT">Horario semana</h3><select id="wsel" aria-label="Semana">${ROWS.map(r=>`<option value="${r.n}"${r.n===S.wn?' selected':''}>Semana ${r.label} · ${fd(r.days[0])} – ${fd(r.days[6])}</option>`).join('')}</select><label class="dchk"><input type="checkbox" id="wsplit"${S.wsplit?' checked':''}><span>Una página por zona</span></label><button type="button" class="x" data-act="wx" aria-label="Cerrar">×</button></div><div class="wz">${ZK.map(k=>`<label class="dchk"><input type="checkbox" data-wz="${k}"${S.wz.includes(k)?' checked':''}><span>${ZN[k]}</span></label>`).join('')}</div><div class="wb" id="wprev"></div><div class="wf"><span>Se abre el diálogo de impresión: elige «Guardar como PDF».</span><button type="button" class="btn" data-act="wpdf">Descargar PDF</button></div>`;
+  renderWeek();
+  if(!dg.open){try{dg.showModal();}catch(e){dg.setAttribute('open','');}}
+}
+function renderWeek(){const b=$('#wprev');if(b)b.innerHTML=weekSheet(S.wn,S.wz,!!S.wsplit);}
+function printWeek(){
+  const r=ROWS[S.wn-1],fd=d=>pad(d.num)+'-'+pad(d.mo+1);
+  $('#wprint').innerHTML=weekSheet(S.wn,S.wz,!!S.wsplit);
+  const tt=document.title;document.title='Horario semana '+r.label+' ('+fd(r.days[0])+' a '+fd(r.days[6])+')'+(S.wz.length<ZK.length?' - '+S.wz.join('+'):'');
+  document.body.classList.add('pw');
+  const done=()=>{document.body.classList.remove('pw');document.title=tt;$('#wprint').innerHTML='';removeEventListener('afterprint',done);};
+  addEventListener('afterprint',done);
+  try{window.print();}catch(e){done();}
+}
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.id==='wsel'){S.wn=Number(t.value);renderWeek();}
+  else if(t.id==='wsplit'){S.wsplit=t.checked;renderWeek();}
+  else if(t.dataset&&t.dataset.wz){S.wz=ZK.filter(k=>k===t.dataset.wz?t.checked:S.wz.includes(k));renderWeek();}
+});
 function dlgGo(d){S.dlgEdit=false;const l=dlgList();if(!l.length)return;let i=l.findIndex(p=>p.id===S.dlg);i=(i+d+l.length)%l.length;S.dlg=l[i].id;const dg=$('#pdlg');renderDlg();const b=dg.querySelector('.db');if(b){b.scrollTop=0;[...b.children].forEach(x=>x.scrollTop=0);}}
 function render(){buildHmap();renderStatus();renderView();renderTable();renderPanel();renderNew();renderLegend();renderDlg();}
 
@@ -863,6 +986,9 @@ document.addEventListener('click',e=>{
   else if(a==='covdlg')openCov(b.dataset.sid);
   else if(a==='vdlg')openVac(n);
   else if(a==='viewed'){const id=curView();if(!id)return;S.dlg=id;S.dlgEdit=false;renderDlg();const dg=$('#pdlg');if(!dg.open){try{dg.showModal();}catch(err){dg.setAttribute('open','');}}}
+  else if(a==='wdlg')openWeek();
+  else if(a==='wx')$('#wdlg').close();
+  else if(a==='wpdf')printWeek();
   else if(a==='staff'){const d=$('#sdlg');render();if(!d.open){try{d.showModal();}catch(e){d.setAttribute('open','');}}}
   else if(a==='sclose')$('#sdlg').close();
   else if(a==='pdel'){if(S.confirm===id){S.confirm=null;$('#pdlg').close();removePerson(id);toast('Persona eliminada.');}else{S.confirm=id;renderDlg();}}
@@ -921,7 +1047,7 @@ $('#addP').addEventListener('submit',e=>{
   e.preventDefault();
   if(addPerson($('#pn').value,$('#pc').value,$('#pz').value)){$('#pn').value='';$('#pn').focus();}
 });
-window.addEventListener('beforeprint',()=>{S._tt=document.title;const pp=S.people[curView()];document.title=(pp?pp.name+' - ':'')+'Calendario Laboral 2027 Teórico';S._th=document.documentElement.dataset.theme;document.documentElement.dataset.theme='light';});
+window.addEventListener('beforeprint',()=>{if(document.body.classList.contains('pw'))return;S._tt=document.title;const pp=S.people[curView()];document.title=(pp?pp.name+' - ':'')+'Calendario Laboral 2027 Teórico';S._th=document.documentElement.dataset.theme;document.documentElement.dataset.theme='light';});
 window.addEventListener('afterprint',()=>{if(S._tt)document.title=S._tt;if(S._th===undefined)delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=S._th;});
 $('#print').addEventListener('click',async()=>{
   {try{window.print();}catch(err){toast('Imprime con Ctrl+P (Cmd+P en Mac).');}return;}
