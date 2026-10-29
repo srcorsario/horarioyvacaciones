@@ -68,6 +68,9 @@ td,th{padding:0;height:28px}
 .rrow.sub span{font-weight:400;color:var(--muted);padding-left:10px}
 .d.x{background:var(--off)}
 tr.warn .vac.bb{box-shadow:inset 3px 0 0 var(--warn)}
+td.br,th.br{border-right:2px solid var(--ink)}
+td.bb,th.bb{border-bottom:2px solid var(--ink)}
+td.vac.bb{border-bottom:0}
 .vac{padding:2px 8px;min-width:200px}
 .vin{display:flex;flex-wrap:wrap;white-space:normal;padding:2px 0;align-items:center;gap:4px;min-height:24px}
 .vac.blk{background:var(--block);color:var(--block-ink)}
@@ -254,7 +257,13 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
   header{margin:0 0 2mm;align-items:baseline}
   h1{font-size:15pt}
   .sub{display:inline;font-size:8pt;margin:0 0 0 3mm}
-  .pwho{display:block;font:700 9pt var(--sans);margin:0 0 1.5mm}
+  .pwho{display:block;font:700 9pt var(--sans);margin:1mm 0 1.5mm}
+  header{display:block!important;text-align:center}
+  header>div{width:100%}
+  header h1{display:block}
+  header .sub{display:block!important;margin:1mm 0 0!important}
+  header .disc{max-width:none!important;white-space:nowrap;font-size:6.8pt!important;margin:.6mm 0 0!important}
+  .legend{justify-content:center}
   .legend{font-size:6.5pt;gap:1mm 3mm;margin:0 0 1.5mm}
   .legend i{width:9px;height:7px}
   .tablewrap{overflow:visible;border:0;border-radius:0;background:#fff}
@@ -292,7 +301,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 @media print{.edonly,dialog,#ldlg{display:none!important}}
 .vadd{flex:none;height:24px;border:1px dashed var(--line);border-radius:4px;background:var(--surface);color:var(--muted);font-size:12px;padding:0 8px;cursor:pointer}
 .vadd:hover{border-color:var(--ink);color:var(--ink)}
-#vdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:min(720px,calc(100vw - 24px));height:min(820px,calc(100dvh - 32px));overflow:hidden}
+#vdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:calc(100vw - 24px);max-width:none;height:calc(100dvh - 24px);max-height:none;overflow:hidden}
 #vdlg[open]{display:flex;flex-direction:column}#vdlg::backdrop{background:rgba(10,15,22,.5)}
 #vdlg .ch{padding:12px 14px;border-bottom:1px solid var(--line);font:700 16px var(--sans)}
 #vdlg .ch small{display:block;font:400 12px var(--sans);color:var(--muted)}
@@ -301,7 +310,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 #vdlg .cb{flex:1;min-height:0;overflow-y:auto;padding:0 14px 12px}
 #vdlg .vz{font:700 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:14px 0 2px;border-bottom:2px solid var(--ink)}
 #vdlg .vc{font:600 11px var(--sans);color:var(--muted);padding:8px 0 2px}
-#vdlg .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 12px}
+#vdlg .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:2px 12px}
 #vdlg label{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:13px;cursor:pointer}
 #vdlg label:hover{background:var(--off)}
 #vdlg label.on{background:var(--hl)}
@@ -483,6 +492,7 @@ const cRank=p=>{const c=cat(p.cat).id;return c in CRANK?CRANK[c]:4+S.cfg.cats.fi
 const byZone=ps=>[...ps].sort((a,b)=>{const ia=ZK.indexOf(zKey(a)),ib=ZK.indexOf(zKey(b));return ((ia<0?99:ia)-(ib<0?99:ib))||(cRank(a)-cRank(b));});
 const groups=ps=>{const o=[];byZone(ps).forEach(p=>{const k=zKey(p);let g=o[o.length-1];if(!g||g.k!==k){g={k,ps:[]};o.push(g);}g.ps.push(p);});return o;};
 const numOf=id=>{const p=S.people[id];if(p&&p.num)return p.num;const m=/-n(\d+)$/.exec(id||'');return m?Number(m[1]):0;};
+const shortName=(()=>{const cln=n=>String(n).replace(/\(.*?\)/g,'').trim().split(/\s+/);const base=n=>{const w=cln(n);return w.length>1?w[0]+' '+w[1][0]:w[0];};return id=>{const p=S.people[id];if(!p)return '';const b=base(p.name);if(!Object.entries(S.people).some(([k,q])=>k!==id&&base(q.name)===b))return b;const w=cln(p.name);return w.length>1?w[0]+' '+w[1]:p.name;};})();
 const people=()=>Object.entries(S.people).map(([id,p])=>({id,...p})).sort((a,b)=>(a.ord||0)-(b.ord||0)||a.name.localeCompare(b.name,'es'));
 
 let tt;
@@ -647,7 +657,7 @@ function renderTable(){
       if(inRow.some((p,i)=>inRow.some((q,j)=>j>i&&clash(p,q))))cls+=' warn';
       const used={has:()=>false};const bad=p=>inRow.some(q=>clash(p,q));
       if(S.focus&&w.p.includes(S.focus))cls+=' hl';
-      const chips=inRow.map(p=>`<span class="chip${zOk(p)?'':' dim'}" style="--c:${cat(p.cat).color}">${esc(p.name)}${ro?'':`<button data-act="rm" data-n="${n}" data-id="${p.id}" aria-label="Quitar a ${esc(p.name)} de la semana ${r.label}">×</button>`}</span>`).join('');
+      const chips=inRow.map(p=>`<span class="chip${zOk(p)?'':' dim'}" style="--c:${cat(p.cat).color}" title="${esc(p.name)}">${esc(shortName(p.id))}${ro?'':`<button data-act="rm" data-n="${n}" data-id="${p.id}" aria-label="Quitar a ${esc(p.name)} de la semana ${r.label}">×</button>`}</span>`).join('');
       const rest=ps.filter(p=>!w.p.includes(p.id));
       const add=(!ro&&rest.length)?`<button type="button" class="vadd" data-act="vdlg" data-n="${n}" aria-label="Elegir vacaciones de la semana ${r.label}">+ ${inRow.length?'Editar':'Añadir'}</button>`:'';
       const lk=ro?'':`<button class="lock" data-act="blk" data-n="${n}" ${inRow.length?'disabled':''} title="${inRow.length?'Quita las vacaciones para poder bloquear':'Bloquear semana'}" aria-label="Bloquear la semana ${r.label}">${LOCK}</button>`;
