@@ -175,7 +175,7 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
 .schb{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
 .schb b{font-weight:600}.schb span{color:var(--muted);font-size:12px;text-align:right}
 .schb:hover b{text-decoration:underline}.schb:focus-visible{outline:2px solid var(--focus)}
-#pdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:min(580px,calc(100vw - 24px));height:min(860px,calc(100dvh - 24px));max-height:none;overflow:hidden}
+#pdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:calc(100vw - 32px);max-width:1700px;height:calc(100dvh - 32px);max-height:none;overflow:hidden}
 #pdlg[open]{display:flex;flex-direction:column}
 #pdlg::backdrop{background:rgba(10,15,22,.55)}
 .dh{display:grid;grid-template-columns:36px minmax(0,1fr) 36px 36px;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface)}
@@ -348,6 +348,19 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 .schb.sc2 em{font:600 11px var(--mono);font-style:normal;color:var(--muted)}
 .pdel{color:var(--warn)!important;border-color:var(--warn)!important}
 @media print{#sdlg{display:none!important}}
+#pdlg .db{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr) minmax(280px,380px);gap:0;padding:0;overflow:hidden}
+#pdlg .db>div{min-height:0;overflow-y:auto;padding:12px 16px 16px;overscroll-behavior:contain}
+#pdlg .db>div+div{border-left:1px solid var(--line)}
+#pdlg .c3 .dv:first-child{border-top:0;margin-top:0;padding-top:0}
+#pdlg .c3 .dv ul{grid-template-columns:1fr}
+#pdlg .c3 .dv li{font-size:13px;padding:6px 6px 6px 10px}
+#pdlg .c1 .days{flex-direction:column;align-items:stretch}
+#pdlg .c2 .ed{padding-top:0}
+#pdlg .c2 .cs{height:32px;font-size:12px}
+#pdlg .cw{grid-template-columns:54px repeat(7,minmax(0,1fr))}
+#pdlg .dh{padding:10px 16px}
+#pdlg .dh h3{font-size:19px}
+@media (max-width:1000px){#pdlg .db{display:block;overflow-y:auto}#pdlg .db>div{overflow:visible}#pdlg .db>div+div{border-left:0;border-top:1px solid var(--line)}}
 </style>
 </head><body>
 <div class="app">
@@ -788,14 +801,14 @@ function renderDlg(){
   const dg=$('#pdlg');
   if(!S.dlg||!S.people[S.dlg]){if(dg.open)dg.close();return;}
   const ro=!S.canWrite,ps=people(),list=dlgList(),i=list.findIndex(p=>p.id===S.dlg),p={id:S.dlg,...S.people[S.dlg]};
-  const old=dg.querySelector('.db'),st=old?old.scrollTop:0,fid=document.activeElement&&dg.contains(document.activeElement)?document.activeElement.dataset.sf||document.activeElement.dataset.act||'':'';
+  const old=dg.querySelector('.db'),st=old?old.scrollTop:0,cst=old?[...old.children].map(x=>x.scrollTop):[],fid=document.activeElement&&dg.contains(document.activeElement)?document.activeElement.dataset.sf||document.activeElement.dataset.act||'':'';
   const fd=d=>pad(d.num)+'/'+pad(d.mo+1);
   const vw=ROWS.filter(r=>r.n>1&&wk(r.n).p.includes(p.id));
   const vac=`<section class="dv"><h4>Vacaciones asignadas · ${vw.length} semana${vw.length===1?'':'s'}</h4>${vw.length?`<ul>${vw.map(r=>`<li><span><b>Sem. ${r.label}</b> · ${fd(r.days[0])}–${fd(r.days[6])}</span>${ro?'':`<button type="button" data-act="rm" data-n="${r.n}" data-id="${p.id}" aria-label="Quitar la semana ${r.label}">×</button>`}</li>`).join('')}</ul>`:'<p class="hint" style="margin:0">Sin semanas asignadas. Añádelas desde la columna Vacaciones del calendario.</p>'}</section>`;
   const nmH=S.dlgEdit&&!ro?`<span class="nm"><input id="dlgName" value="${esc(p.name)}" maxlength="30" aria-label="Nombre"><button type="button" data-act="nmok" aria-label="Guardar nombre">✓</button><button type="button" data-act="nmx" aria-label="Cancelar">↺</button></span>`:`${esc(p.name)}${ro?'':`<button type="button" class="pen" data-act="nmed" aria-label="Editar nombre" title="Editar nombre">✎</button>`}`;
-  dg.innerHTML=`<div class="dh"><button type="button" data-act="dprev" aria-label="Persona anterior">‹</button><h3 id="pdlgT">${nmH}<small>${i>=0?(i+1)+' de '+list.length:''}${zs(p).length?' · '+esc(zTxt(p)):''}</small></h3><button type="button" data-act="dnext" aria-label="Persona siguiente">›</button><button type="button" data-act="dclose" aria-label="Cerrar">×</button></div><div class="db">${zEd(p,ro)}${editorHTML(p.id,dataOf(p),ro,ps)}${vac}${ro?'':`<section class="dv"><button type="button" class="btn ghost pdel" data-act="pdel" data-id="${p.id}">${S.confirm===p.id?'¿Seguro? Pulsa otra vez para eliminar':'Eliminar persona'}</button></section>`}</div>`;
+  dg.innerHTML=`<div class="dh"><button type="button" data-act="dprev" aria-label="Persona anterior">‹</button><h3 id="pdlgT">${nmH}<small>${i>=0?(i+1)+' de '+list.length:''}${zs(p).length?' · '+esc(zTxt(p)):''}</small></h3><button type="button" data-act="dnext" aria-label="Persona siguiente">›</button><button type="button" data-act="dclose" aria-label="Cerrar">×</button></div><div class="db"><div class="c1">${zEd(p,ro)}</div><div class="c2">${editorHTML(p.id,dataOf(p),ro,ps)}</div><div class="c3">${vac}${ro?'':`<section class="dv"><button type="button" class="btn ghost pdel" data-act="pdel" data-id="${p.id}">${S.confirm===p.id?'¿Seguro? Pulsa otra vez para eliminar':'Eliminar persona'}</button></section>`}</div></div>`;
   if(S.dlgEdit){const inp=dg.querySelector('#dlgName');if(inp){inp.focus();inp.select();}}
-  const nb=dg.querySelector('.db');nb.scrollTop=st;
+  const nb=dg.querySelector('.db');nb.scrollTop=st;[...nb.children].forEach((x,i)=>{if(cst[i])x.scrollTop=cst[i];});
   if(fid){const el=dg.querySelector(`[data-sf="${fid}"],[data-act="${fid}"]`);if(el)el.focus({preventScroll:true});}
 }
 function saveName(){const inp=$('#dlgName');if(!inp)return;const nm=inp.value.trim(),id=S.dlg;if(!nm){toast('El nombre no puede estar vacío.');return;}if(people().some(q=>q.id!==id&&q.name.toLowerCase()===nm.toLowerCase())){toast(nm+' ya está en la lista.');return;}S.dlgEdit=false;if(nm!==S.people[id].name)put('people/'+id,{...S.people[id],name:nm});else renderDlg();}
@@ -830,7 +843,7 @@ function renderVac(){
 }
 document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.vp)return;e.stopImmediatePropagation();if(t.checked)S.vsel.add(t.dataset.vp);else S.vsel.delete(t.dataset.vp);renderVac();},true);
 document.addEventListener('input',e=>{if(e.target.id==='vq'){S.vq=e.target.value;renderVac();}else if(e.target.id==='sq'){S.sq=e.target.value;renderPanel();}});
-function dlgGo(d){S.dlgEdit=false;const l=dlgList();if(!l.length)return;let i=l.findIndex(p=>p.id===S.dlg);i=(i+d+l.length)%l.length;S.dlg=l[i].id;const dg=$('#pdlg');renderDlg();const b=dg.querySelector('.db');if(b)b.scrollTop=0;}
+function dlgGo(d){S.dlgEdit=false;const l=dlgList();if(!l.length)return;let i=l.findIndex(p=>p.id===S.dlg);i=(i+d+l.length)%l.length;S.dlg=l[i].id;const dg=$('#pdlg');renderDlg();const b=dg.querySelector('.db');if(b){b.scrollTop=0;[...b.children].forEach(x=>x.scrollTop=0);}}
 function render(){buildHmap();renderStatus();renderView();renderTable();renderPanel();renderNew();renderLegend();renderDlg();}
 
 /* ---------- eventos ---------- */
