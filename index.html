@@ -1,5 +1,5 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
-<title>Calendario Laboral 2027</title>
+<title>Calendario Laboral 2027</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="icon" href="favicon.ico" sizes="any"><link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Layout: hoja de rotación a la izquierda (53 filas de semana), panel de personas y ajustes a la derecha; en móvil el panel pasa arriba. */
@@ -361,6 +361,8 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 #pdlg .dh{padding:10px 16px}
 #pdlg .dh h3{font-size:19px}
 @media (max-width:1000px){#pdlg .db{display:block;overflow-y:auto}#pdlg .db>div{overflow:visible}#pdlg .db>div+div{border-left:0;border-top:1px solid var(--line)}}
+#viewEd{height:32px}
+@media print{#viewEd{display:none!important}}
 </style>
 </head><body>
 <div class="app">
@@ -379,6 +381,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
       <div class="viewbar">
         <label for="view">Ver horario de</label>
         <select id="view"></select>
+        <button class="btn ghost" id="viewEd" type="button" data-act="viewed">Ver ficha</button>
         <span id="viewNote" class="vnote"></span>
       </div>
       <ul class="legend" id="legend" aria-label="Leyenda"></ul>
@@ -859,6 +862,7 @@ document.addEventListener('click',e=>{
   else if(a==='nmx'){S.dlgEdit=false;renderDlg();}
   else if(a==='covdlg')openCov(b.dataset.sid);
   else if(a==='vdlg')openVac(n);
+  else if(a==='viewed'){const id=curView();if(!id)return;S.dlg=id;S.dlgEdit=false;renderDlg();const dg=$('#pdlg');if(!dg.open){try{dg.showModal();}catch(err){dg.setAttribute('open','');}}}
   else if(a==='staff'){const d=$('#sdlg');render();if(!d.open){try{d.showModal();}catch(e){d.setAttribute('open','');}}}
   else if(a==='sclose')$('#sdlg').close();
   else if(a==='pdel'){if(S.confirm===id){S.confirm=null;$('#pdlg').close();removePerson(id);toast('Persona eliminada.');}else{S.confirm=id;renderDlg();}}
