@@ -303,7 +303,10 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 .vadd:hover{border-color:var(--ink);color:var(--ink)}
 #vdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:calc(100vw - 24px);max-width:none;height:calc(100dvh - 24px);max-height:none;overflow:hidden}
 #vdlg[open]{display:flex;flex-direction:column}#vdlg::backdrop{background:rgba(10,15,22,.5)}
-#vdlg .ch{padding:12px 14px;border-bottom:1px solid var(--line);font:700 16px var(--sans)}
+#vdlg .ch{padding:10px 14px;border-bottom:1px solid var(--line);font:700 17px var(--sans);display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px;text-align:center}
+#vdlg .ch button{all:unset;cursor:pointer;width:40px;height:40px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;font-size:22px;color:var(--ink)}
+#vdlg .ch button:hover{background:var(--off)}
+#vdlg .ch button[disabled]{opacity:.3;cursor:not-allowed}
 #vdlg .ch small{display:block;font:400 12px var(--sans);color:var(--muted)}
 #vdlg .vs{padding:8px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
 #vdlg .vs input{flex:1;height:32px;border:1px solid var(--line);border-radius:6px;padding:0 8px;background:var(--surface);color:var(--ink)}
@@ -451,7 +454,8 @@ const wk=n=>S.weeks[wid(n)]||{p:[],b:false};
 const cat=id=>S.cfg.cats.find(c=>c.id===id)||S.cfg.cats[0];
 const grpOf=cid=>{const c=cat(cid);return c.grp||('own:'+c.id);};
 const zl=p=>{const a=zs(p);return a.length?a:['-'];};
-const clash=(p,q)=>grpOf(p.cat)===grpOf(q.cat)&&zl(p).some(z=>zl(q).includes(z));
+const poolOf=p=>{const g=grpOf(p.cat),cv=Array.isArray(p.cover)?p.cover:(p.cover?[p.cover]:[]);if(cv.some(i=>S.people[i]&&grpOf(S.people[i].cat)===g))return 'pool:'+p.name;const c=Object.values(S.people).find(q=>q!==p&&grpOf(q.cat)===g&&(Array.isArray(q.cover)?q.cover:(q.cover?[q.cover]:[])).some(i=>S.people[i]===p||(p.id&&i===p.id)));return c?'pool:'+c.name:'';};
+const clash=(p,q)=>grpOf(p.cat)===grpOf(q.cat)&&zl(p).some(z=>zl(q).includes(z))&&poolOf(p)===poolOf(q);
 const schedOf=p=>{
   if(!p)return null;
   if(p.rot&&p.rot.cyc&&p.rot.cyc.length)return {k:'rot',cyc:p.rot.cyc,start:p.rot.start||0,from:p.rot.from||'09:00',to:p.rot.to||'17:00',from2:p.rot.from2||'',to2:p.rot.to2||'',from3:p.rot.from3||'',to3:p.rot.to3||'',mf:p.rot.mFrom||'08:30',mt:p.rot.mTo||'16:30',nf:p.rot.nFrom||'16:00',nt:p.rot.nTo||'00:00'};
@@ -783,10 +787,12 @@ function openVac(n){
   S.vn=n;S.vsel=new Set(wk(n).p.filter(i=>S.people[i]));S.vq='';
   const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1);
   const dg=$('#vdlg');
-  dg.innerHTML=`<div class="ch" id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona.</small></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
+  dg.innerHTML=`<div class="ch"><button type="button" data-act="vprev" aria-label="Semana anterior"${n<=2?' disabled':''}>‹</button><div id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona. Quien cubre a otros forma grupo aparte con ellos.</small></div><button type="button" data-act="vnext" aria-label="Semana siguiente"${n>=53?' disabled':''}>›</button></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
   renderVac();
-  try{dg.showModal();}catch(e){dg.setAttribute('open','');}
+  if(!dg.open){try{dg.showModal();}catch(e){dg.setAttribute('open','');}}
+  const q=$('#vq');if(q)q.focus();
 }
+function saveVac(){const vn=S.vn,w=cl(wk(vn)),ids=[...S.vsel];const same=ids.length===w.p.filter(i=>S.people[i]).length&&ids.every(i=>w.p.includes(i));if(same)return;w.p=[...w.p.filter(i=>ids.includes(i)),...ids.filter(i=>!w.p.includes(i))];put('weeks/'+wid(vn),(w.p.length||w.b)?w:null);}
 function renderVac(){
   const sel=S.vsel,q=(S.vq||'').toLowerCase(),box=$('#vlist');if(!box)return;const st=box.scrollTop;
   const selP=[...sel].map(i=>({id:i,...S.people[i]}));
@@ -819,7 +825,8 @@ document.addEventListener('click',e=>{
   else if(a==='vdlg')openVac(n);
   else if(a==='vx')$('#vdlg').close();
   else if(a==='vnone'){S.vsel=new Set();renderVac();}
-  else if(a==='vok'){const vn=S.vn,w=cl(wk(vn)),ids=[...S.vsel];w.p=[...w.p.filter(i=>ids.includes(i)),...ids.filter(i=>!w.p.includes(i))];$('#vdlg').close();put('weeks/'+wid(vn),(w.p.length||w.b)?w:null);}
+  else if(a==='vok'){$('#vdlg').close();saveVac();}
+  else if(a==='vprev'||a==='vnext'){saveVac();openVac(Math.min(53,Math.max(2,S.vn+(a==='vnext'?1:-1))));}
   else if(a==='covnone')$('#cdlg').querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);
   else if(a==='covx')$('#cdlg').close();
   else if(a==='covok'){const ids=[...$('#cdlg').querySelectorAll('input:checked')].map(x=>x.value);$('#cdlg').close();editSched(b.dataset.sid,d=>{d.cover=ids;});}
