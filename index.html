@@ -240,12 +240,19 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
   .vac.blk span{font-size:10px}
   .big b{font-size:38px}
 }
-@page{size:A4 portrait;margin:7mm}
+@page{size:A4 portrait;margin:0}
 @media print{
   html,body{background:#fff!important}
   body::before,#toast,.status,#print,.viewbar,.vnote,.panel,.lock,select.add,.chip button{display:none!important}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .app{max-width:none;padding:0}
+  .app{max-width:none;margin:0;padding:9mm 11mm 6mm}
+  .vac,.vac.bb,tr.warn .vac,tr.warn .vac.bb{box-shadow:none!important}
+  tr.warn .vac{box-shadow:none}
+  thead th{border-bottom:1.5px solid #000}
+  colgroup col:nth-child(4){width:33.1%!important}
+  colgroup col:nth-child(1){width:9%!important}
+  colgroup col:nth-child(2){width:6.5%!important}
+  colgroup col:nth-child(3){width:7.3%!important}
   .layout{display:block}
   header{margin:0 0 2mm;align-items:baseline}
   h1{font-size:15pt}
@@ -285,7 +292,7 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
 .status.err{color:var(--warn);border-color:var(--warn)}
 .dbt{display:flex;flex-wrap:wrap;gap:8px}
 body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
-@media print{.edonly{display:none!important}}
+@media print{.edonly,dialog,#ldlg{display:none!important}}
 </style>
 </head><body>
 <div class="app">
@@ -345,7 +352,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
         <h2>Categorías de trabajo</h2>
         <ul id="cats"></ul>
         <button class="btn ghost" id="addC" type="button" style="margin-top:10px">Nueva categoría</button>
-        <p class="hint">Dos personas de la misma categoría no pueden coincidir de vacaciones en la misma semana. Las categorías del mismo grupo de exclusión tampoco pueden coincidir entre sí. El número indica las semanas sin nadie de esa categoría o su grupo.</p>
+        <p class="hint">Dos personas de la misma categoría y la misma zona no pueden coincidir de vacaciones en la misma semana. Las categorías del mismo grupo de exclusión tampoco, si comparten zona. Entre zonas distintas sí pueden coincidir. El número indica las semanas sin nadie de esa categoría o su grupo.</p>
       </section>
 
       <section class="card set">
@@ -414,6 +421,8 @@ const wid=n=>'w'+pad(n);
 const wk=n=>S.weeks[wid(n)]||{p:[],b:false};
 const cat=id=>S.cfg.cats.find(c=>c.id===id)||S.cfg.cats[0];
 const grpOf=cid=>{const c=cat(cid);return c.grp||('own:'+c.id);};
+const zl=p=>{const a=zs(p);return a.length?a:['-'];};
+const clash=(p,q)=>grpOf(p.cat)===grpOf(q.cat)&&zl(p).some(z=>zl(q).includes(z));
 const schedOf=p=>{
   if(!p)return null;
   if(p.rot&&p.rot.cyc&&p.rot.cyc.length)return {k:'rot',cyc:p.rot.cyc,start:p.rot.start||0,from:p.rot.from||'09:00',to:p.rot.to||'17:00',from2:p.rot.from2||'',to2:p.rot.to2||'',from3:p.rot.from3||'',to3:p.rot.to3||'',mf:p.rot.mFrom||'08:30',mt:p.rot.mTo||'16:30',nf:p.rot.nFrom||'16:00',nt:p.rot.nTo||'00:00'};
@@ -520,8 +529,8 @@ function showLogin(){const d=$('#ldlg');$('#lerr').textContent='';if(!d.open){tr
 /* ---------- acciones ---------- */
 function addToWeek(n,pid){
   const w=cl(wk(n)),p=S.people[pid]; if(!p||w.b||w.p.includes(pid))return;
-  const clash=w.p.map(i=>S.people[i]).find(q=>q&&grpOf(q.cat)===grpOf(p.cat));
-  if(clash){toast(p.name+' no puede coincidir con '+clash.name+' esa semana.');render();return;}
+  const cq=w.p.map(i=>S.people[i]).find(q=>q&&clash(p,q));
+  if(cq){toast(p.name+' no puede coincidir con '+cq.name+' esa semana (misma zona).');render();return;}
   w.p.push(pid); put('weeks/'+wid(n),w);
 }
 function removeFromWeek(n,pid){
@@ -567,7 +576,7 @@ function changeCat(id,nc){
   const p=S.people[id];
   for(const [k,w] of Object.entries(S.weeks)){
     if(!w.p||!w.p.includes(id))continue;
-    const other=w.p.filter(i=>i!==id).map(i=>S.people[i]).find(q=>q&&grpOf(q.cat)===grpOf(nc));
+    const other=w.p.filter(i=>i!==id).map(i=>S.people[i]).find(q=>q&&clash({...p,cat:nc},q));
     if(other){toast('No se puede: coincide con '+other.name+' en la semana '+Number(k.slice(1))+'.');render();return;}
   }
   put('people/'+id,{...p,cat:nc});
@@ -615,12 +624,12 @@ function renderTable(){
       vac=`<td class="vac blk"><div class="vin"><span>Bloqueada</span>${ro?'':`<button class="lock" data-act="blk" data-n="${n}" aria-label="Desbloquear la semana ${r.label}">${LOCK}</button>`}</div></td>`;
     }else{
       const inRow=w.p.filter(i=>S.people[i]).map(i=>({id:i,...S.people[i]}));
-      const used=new Set(inRow.map(p=>grpOf(p.cat)));
-      if(used.size<inRow.length)cls+=' warn';
+      if(inRow.some((p,i)=>inRow.some((q,j)=>j>i&&clash(p,q))))cls+=' warn';
+      const used={has:()=>false};const bad=p=>inRow.some(q=>clash(p,q));
       if(S.focus&&w.p.includes(S.focus))cls+=' hl';
       const chips=inRow.map(p=>`<span class="chip${zOk(p)?'':' dim'}" style="--c:${cat(p.cat).color}">${esc(p.name)}${ro?'':`<button data-act="rm" data-n="${n}" data-id="${p.id}" aria-label="Quitar a ${esc(p.name)} de la semana ${r.label}">×</button>`}</span>`).join('');
       const rest=ps.filter(p=>!w.p.includes(p.id));
-      const add=(!ro&&rest.length)?`<select class="add" data-n="${n}" aria-label="Añadir vacaciones en la semana ${r.label}"><option value="">+ Añadir</option>${rest.map(p=>`<option value="${p.id}"${used.has(grpOf(p.cat))?' disabled':''}>${esc(p.name)}${used.has(grpOf(p.cat))?' (no puede coincidir)':''}</option>`).join('')}</select>`:'';
+      const add=(!ro&&rest.length)?`<select class="add" data-n="${n}" aria-label="Añadir vacaciones en la semana ${r.label}"><option value="">+ Añadir</option>${rest.map(p=>`<option value="${p.id}"${bad(p)?' disabled':''}>${esc(p.name)}${bad(p)?' (no puede coincidir)':''}</option>`).join('')}</select>`:'';
       const lk=ro?'':`<button class="lock" data-act="blk" data-n="${n}" ${inRow.length?'disabled':''} title="${inRow.length?'Quita las vacaciones para poder bloquear':'Bloquear semana'}" aria-label="Bloquear la semana ${r.label}">${LOCK}</button>`;
       const sb=subOn(n);const cv=sb?`<span class="covl">Cubre a ${esc(sb.q.name)}</span>`:'';
       vac=`<td class="vac"><div class="vin">${chips}${cv}${add}${lk}</div></td>`;
@@ -806,8 +815,8 @@ $('#addP').addEventListener('submit',e=>{
   e.preventDefault();
   if(addPerson($('#pn').value,$('#pc').value,$('#pz').value)){$('#pn').value='';$('#pn').focus();}
 });
-window.addEventListener('beforeprint',()=>{S._th=document.documentElement.dataset.theme;document.documentElement.dataset.theme='light';});
-window.addEventListener('afterprint',()=>{if(S._th===undefined)delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=S._th;});
+window.addEventListener('beforeprint',()=>{S._tt=document.title;const pp=S.people[curView()];document.title=(pp?pp.name+' - ':'')+'Calendario Laboral 2027 Teórico';S._th=document.documentElement.dataset.theme;document.documentElement.dataset.theme='light';});
+window.addEventListener('afterprint',()=>{if(S._tt)document.title=S._tt;if(S._th===undefined)delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=S._th;});
 $('#print').addEventListener('click',async()=>{
   {try{window.print();}catch(err){toast('Imprime con Ctrl+P (Cmd+P en Mac).');}return;}
   const wrap=document.querySelector('.tablewrap').cloneNode(true);
