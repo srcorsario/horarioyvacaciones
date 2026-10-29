@@ -409,19 +409,22 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 #wdlg .wh .x{all:unset;cursor:pointer;margin-left:auto;width:36px;height:36px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;font-size:20px}
 #wdlg .wz{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line)}
 #wdlg .wb{flex:1;min-height:0;overflow:auto;padding:14px;background:var(--off)}
+#wdlg .wb .wsheet+.wsheet{margin-top:14px}
 #wdlg .wb .wsheet{background:#fff;padding:10mm;max-width:297mm;margin:0 auto;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 #wdlg .wf{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
 #wdlg .wf span{font-size:12px;color:var(--muted)}
 .wsheet{color:#000;font-family:var(--sans)}
 .wsheet h2{all:unset;display:block;text-align:center;font:800 15pt var(--display);color:#000}
 .wsheet .wsub{text-align:center;font-size:9pt;margin:1mm 0 3mm;color:#333}
-.wsheet table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:7.1pt}
-.wsheet th,.wsheet td{border:.6px solid #999;height:auto;padding:1.1mm .8mm;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsheet table{width:100%;min-width:0;border-collapse:collapse;table-layout:fixed;font-size:6.9pt}
+.wsheet th,.wsheet td{border:.6px solid #999;height:auto;padding:.4mm .8mm;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wsheet thead th{position:static;background:#bdbdbd;color:#000;font:700 8pt var(--sans);letter-spacing:0;text-transform:none;text-align:center;border-bottom:.6px solid #999}
-.wsheet thead th:first-child{text-align:left;width:19%}
+.wsheet thead tr:nth-child(2) th:first-child{text-align:left;width:19%}
+.wsheet thead tr.tt th{background:#fff;border:0;padding:0 0 1mm}
+.wsheet thead tr.tt th:first-child{text-align:center}
 .wsheet thead th small{display:block;font-weight:500;font-size:6.5pt}
 .wsheet td.nm{font-weight:600;background:#e6e6e6}
-.wsheet tr.zr td{background:#141C26;color:#fff;font:700 8pt var(--sans);letter-spacing:.06em}
+.wsheet tr.zr td{background:#141C26;color:#fff;font:700 7pt var(--sans);letter-spacing:.06em;padding:.5mm 1mm}
 .wsheet td.k-l{background:#d4d4d4;color:#222}
 .wsheet td.k-v{background:#fff;color:#C8283C;font-weight:700}
 .wsheet td.k-w,.wsheet td.k-e{background:#fff}
@@ -429,14 +432,20 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 .wsheet td.cv{font-style:italic}
 .wsheet .wnote{font:700 7.5pt var(--sans);margin-top:3mm}
 .wsheet .wnote small{display:block;font-weight:400;font-style:italic;color:#444;margin-top:1mm}
-.wsheet .pb{break-after:page}
+.wsheet .pb{break-after:page;page-break-after:always}
+.wsheet tfoot td{border:0;height:0;padding:0}
 #wprint{display:none}
-@page wk{size:A4 landscape;margin:8mm}
+@page wk{size:A4 landscape;margin:0}
 @media print{
   body.pw .app,body.pw #toast{display:none!important}
   body.pw #wprint{display:block!important;page:wk}
-  body.pw #wprint .wsheet{padding:0}
-  .wsheet tr{break-inside:avoid}
+  body.pw #wprint .wsheet{padding:0 8mm}
+  body.pw .wsheet thead tr.tt th{padding-top:6mm}
+  body.pw .wsheet h2{font-size:13pt}
+  body.pw .wsheet .wsub{margin:.5mm 0 1.5mm}
+  body.pw .wsheet tfoot td{height:7mm;border:0;background:#fff;padding:0}
+  body.pw .wsheet .wnote{margin-top:-4mm}
+  .wsheet tr,.wsheet tbody.zb{break-inside:avoid}
   .wsheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -938,13 +947,16 @@ function dayCells(p,n){
 function weekSheet(n,zones,split){
   const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1)+'/'+d.y,DN=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
   const gs=groups(people()).filter(g=>zones.includes(g.k));
-  const head=`<thead><tr><th>Nombre trabajador</th>${r.days.map((d,i)=>`<th>${fd(d)}<small>${DN[i]}</small></th>`).join('')}</tr></thead>`;
-  const body=g=>`<tr class="zr"><td colspan="8">${esc(zName(g.k).toUpperCase())}</td></tr>`+g.ps.map(p=>`<tr><td class="nm" title="${esc(p.name)}">${esc(p.name.toUpperCase())}</td>${dayCells(p,n).map(c=>`<td class="k-${c.k}${c.cv?' cv':''}">${esc(c.t)}</td>`).join('')}</tr>`).join('');
-  const title=`<h2>Horario semana ${r.label}</h2><div class="wsub">${fd(r.days[0])} – ${fd(r.days[6])}</div>`;
+  const head=`<thead><tr class="tt"><th colspan="8"><h2>Horario semana ${r.label}</h2><div class="wsub">${fd(r.days[0])} – ${fd(r.days[6])}</div></th></tr><tr><th>Nombre trabajador</th>${r.days.map((d,i)=>`<th>${fd(d)}<small>${DN[i]}</small></th>`).join('')}</tr></thead>`;
+  const body=g=>`<tbody class="zb"><tr class="zr"><td colspan="8">${esc(zName(g.k).toUpperCase())}</td></tr>`+g.ps.map(p=>`<tr><td class="nm" title="${esc(p.name)}">${esc(p.name.toUpperCase())}</td>${dayCells(p,n).map(c=>`<td class="k-${c.k}${c.cv?' cv':''}">${esc(c.t)}</td>`).join('')}</tr>`).join('')+'</tbody>';
+  const title='';
   const note=`<div class="wnote">NOTA: LOS HORARIOS PUEDEN SUFRIR CAMBIOS DEBIDO A LA OCUPACIÓN, EVENTOS O CARGA DE TRABAJO<small>Horario teórico generado a partir del Calendario Laboral 2027. En cursiva, turnos de cobertura de vacaciones.</small></div>`;
   if(!gs.length)return '<div class="wsheet"><p>No hay personas en las zonas elegidas.</p></div>';
-  if(split)return gs.map((g,i)=>`<div class="wsheet${i<gs.length-1?' pb':''}">${title}<table>${head}<tbody>${body(g)}</tbody></table>${note}</div>`).join('');
-  return `<div class="wsheet">${title}<table>${head}<tbody>${gs.map(body).join('')}</tbody></table>${note}</div>`;
+  if(split)return gs.map((g,i)=>`<div class="wsheet${i<gs.length-1?' pb':''}">${title}<table>${head}<tfoot><tr><td colspan="8"></td></tr></tfoot>${body(g)}</table>${note}</div>`).join('');
+  const sh=a=>`<table>${head}<tfoot><tr><td colspan="8"></td></tr></tfoot>${a.map(body).join('')}</table>`;
+  const A=gs.filter(g=>g.k!=='PR'),B=gs.filter(g=>g.k==='PR');
+  if(A.length&&B.length)return `<div class="wsheet pb">${sh(A)}${note}</div><div class="wsheet">${sh(B)}${note}</div>`;
+  return `<div class="wsheet">${sh(gs)}${note}</div>`;
 }
 function curWeekN(){const t=new Date(),u=Date.UTC(t.getFullYear(),t.getMonth(),t.getDate());const i=Math.floor((u-START)/DAY/7)+1;return Math.min(53,Math.max(1,i));}
 function openWeek(){
