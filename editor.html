@@ -67,12 +67,9 @@ td,th{padding:0;height:28px}
 .covl{font-size:11px;color:var(--muted);white-space:nowrap}
 .rrow.sub span{font-weight:400;color:var(--muted);padding-left:10px}
 .d.x{background:var(--off)}
-.br{box-shadow:inset -2px 0 0 var(--ink)}
-.bb{box-shadow:inset 0 -2px 0 var(--ink)}
-.br.bb{box-shadow:inset -2px 0 0 var(--ink),inset 0 -2px 0 var(--ink)}
-tr.warn .vac.bb{box-shadow:inset 3px 0 0 var(--warn),inset 0 -2px 0 var(--ink)}
+tr.warn .vac.bb{box-shadow:inset 3px 0 0 var(--warn)}
 .vac{padding:2px 8px;min-width:200px}
-.vin{display:flex;flex-wrap:nowrap;white-space:nowrap;align-items:center;gap:4px;min-height:24px}
+.vin{display:flex;flex-wrap:wrap;white-space:normal;padding:2px 0;align-items:center;gap:4px;min-height:24px}
 .vac.blk{background:var(--block);color:var(--block-ink)}
 .vac.blk span{font:500 12px var(--sans);letter-spacing:.04em;flex:1}
 tr.hl .vac:not(.blk){background:var(--hl)}
@@ -293,6 +290,28 @@ tr.vc .d{background-image:repeating-linear-gradient(135deg,rgba(200,40,60,.6) 0 
 .dbt{display:flex;flex-wrap:wrap;gap:8px}
 body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 @media print{.edonly,dialog,#ldlg{display:none!important}}
+.vadd{flex:none;height:24px;border:1px dashed var(--line);border-radius:4px;background:var(--surface);color:var(--muted);font-size:12px;padding:0 8px;cursor:pointer}
+.vadd:hover{border-color:var(--ink);color:var(--ink)}
+#vdlg{border:1px solid var(--line);border-radius:10px;padding:0;background:var(--surface);color:var(--ink);width:min(720px,calc(100vw - 24px));height:min(820px,calc(100dvh - 32px));overflow:hidden}
+#vdlg[open]{display:flex;flex-direction:column}#vdlg::backdrop{background:rgba(10,15,22,.5)}
+#vdlg .ch{padding:12px 14px;border-bottom:1px solid var(--line);font:700 16px var(--sans)}
+#vdlg .ch small{display:block;font:400 12px var(--sans);color:var(--muted)}
+#vdlg .vs{padding:8px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center}
+#vdlg .vs input{flex:1;height:32px;border:1px solid var(--line);border-radius:6px;padding:0 8px;background:var(--surface);color:var(--ink)}
+#vdlg .cb{flex:1;min-height:0;overflow-y:auto;padding:0 14px 12px}
+#vdlg .vz{font:700 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:14px 0 2px;border-bottom:2px solid var(--ink)}
+#vdlg .vc{font:600 11px var(--sans);color:var(--muted);padding:8px 0 2px}
+#vdlg .vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:2px 12px}
+#vdlg label{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;font-size:13px;cursor:pointer}
+#vdlg label:hover{background:var(--off)}
+#vdlg label.on{background:var(--hl)}
+#vdlg label.no{opacity:.45;cursor:not-allowed}
+#vdlg label i{width:10px;height:10px;border-radius:2px;flex:none}
+#vdlg label small{color:var(--muted);font-size:11px;margin-left:auto;text-align:right}
+#vdlg .cf{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+#vdlg .cf span{font-size:12px;color:var(--muted)}
+#vdlg .cf div{display:flex;gap:8px}
+@media print{.vadd{display:none!important}}
 </style>
 </head><body>
 <div class="app">
@@ -372,6 +391,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 </div>
 <dialog id="pdlg" aria-labelledby="pdlgT"></dialog>
 <dialog id="cdlg" aria-labelledby="cdlgT"></dialog>
+<dialog id="vdlg" aria-labelledby="vdlgT"></dialog>
 <dialog id="ldlg" class="lg" aria-labelledby="ldlgT"><form id="lform"><h3 id="ldlgT">Editor</h3><label>Usuario<input id="lu" autocomplete="username" required></label><label>Contraseña<input id="lp" type="password" autocomplete="current-password" required></label><p class="err" id="lerr"></p><div class="row"><button type="button" class="btn ghost" id="lcancel">Solo ver</button><button class="btn" id="lok">Entrar</button></div></form></dialog>
 <div id="toast" aria-live="polite"><div id="toastMsg"></div></div>
 
@@ -629,7 +649,7 @@ function renderTable(){
       if(S.focus&&w.p.includes(S.focus))cls+=' hl';
       const chips=inRow.map(p=>`<span class="chip${zOk(p)?'':' dim'}" style="--c:${cat(p.cat).color}">${esc(p.name)}${ro?'':`<button data-act="rm" data-n="${n}" data-id="${p.id}" aria-label="Quitar a ${esc(p.name)} de la semana ${r.label}">×</button>`}</span>`).join('');
       const rest=ps.filter(p=>!w.p.includes(p.id));
-      const add=(!ro&&rest.length)?`<select class="add" data-n="${n}" aria-label="Añadir vacaciones en la semana ${r.label}"><option value="">+ Añadir</option>${rest.map(p=>`<option value="${p.id}"${bad(p)?' disabled':''}>${esc(p.name)}${bad(p)?' (no puede coincidir)':''}</option>`).join('')}</select>`:'';
+      const add=(!ro&&rest.length)?`<button type="button" class="vadd" data-act="vdlg" data-n="${n}" aria-label="Elegir vacaciones de la semana ${r.label}">+ ${inRow.length?'Editar':'Añadir'}</button>`:'';
       const lk=ro?'':`<button class="lock" data-act="blk" data-n="${n}" ${inRow.length?'disabled':''} title="${inRow.length?'Quita las vacaciones para poder bloquear':'Bloquear semana'}" aria-label="Bloquear la semana ${r.label}">${LOCK}</button>`;
       const sb=subOn(n);const cv=sb?`<span class="covl">Cubre a ${esc(sb.q.name)}</span>`:'';
       vac=`<td class="vac"><div class="vin">${chips}${cv}${add}${lk}</div></td>`;
@@ -749,6 +769,28 @@ function openCov(sid){
   dg.innerHTML=`<div class="ch" id="cdlgT">Cubre a<small>${p?esc(p.name)+' · ':''}En las semanas de vacaciones de las personas marcadas hace su horario.</small></div><div class="cb">${list.map(g=>`<div class="zh"><span>${esc(zName(g.k))}</span></div>`+g.ps.map(q=>`<label><input type="checkbox" value="${q.id}"${sel.has(q.id)?' checked':''}><span>${esc(q.name)}</span></label>`).join('')).join('')}</div><div class="cf"><button type="button" class="btn ghost" data-act="covnone">Ninguno</button><button type="button" class="btn ghost" data-act="covx">Cancelar</button><button type="button" class="btn" data-act="covok" data-sid="${sid}">Aceptar</button></div>`;
   try{dg.showModal();}catch(e){dg.setAttribute('open','');}
 }
+function openVac(n){
+  S.vn=n;S.vsel=new Set(wk(n).p.filter(i=>S.people[i]));S.vq='';
+  const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1);
+  const dg=$('#vdlg');
+  dg.innerHTML=`<div class="ch" id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona.</small></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
+  renderVac();
+  try{dg.showModal();}catch(e){dg.setAttribute('open','');}
+}
+function renderVac(){
+  const sel=S.vsel,q=(S.vq||'').toLowerCase(),box=$('#vlist');if(!box)return;const st=box.scrollTop;
+  const selP=[...sel].map(i=>({id:i,...S.people[i]}));
+  const why=p=>{if(sel.has(p.id))return '';const c=selP.find(x=>x.id!==p.id&&clash(p,x));return c?c.name:'';};
+  const ps=people().filter(p=>!q||p.name.toLowerCase().includes(q));
+  box.innerHTML=groups(ps).map(g=>{
+    const cats=[];g.ps.forEach(p=>{const c=cat(p.cat);let k=cats.find(x=>x.c.id===c.id);if(!k){k={c,ps:[]};cats.push(k);}k.ps.push(p);});
+    return `<div class="vz">${esc(zName(g.k))}</div>`+cats.map(k=>`<div class="vc">${esc(k.c.name)}</div><div class="vg">${k.ps.map(p=>{const on=sel.has(p.id),w=why(p);return `<label class="${on?'on':''}${w?' no':''}" title="${w?'Coincide con '+esc(w):''}"><input type="checkbox" data-vp="${p.id}"${on?' checked':''}${w?' disabled':''}><i style="background:${k.c.color}"></i><span>${esc(p.name)}</span><small>${w?'coincide con '+esc(w):zs(p).length>1?esc(zs(p).join('+')):''}</small></label>`;}).join('')}</div>`).join('');
+  }).join('')||'<p class="hint">Nadie con ese nombre.</p>';
+  box.scrollTop=st;
+  $('#vcnt').textContent=sel.size+' de vacaciones esta semana';
+}
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.vp)return;e.stopImmediatePropagation();if(t.checked)S.vsel.add(t.dataset.vp);else S.vsel.delete(t.dataset.vp);renderVac();},true);
+document.addEventListener('input',e=>{if(e.target.id==='vq'){S.vq=e.target.value;renderVac();}});
 function dlgGo(d){S.dlgEdit=false;const l=dlgList();if(!l.length)return;let i=l.findIndex(p=>p.id===S.dlg);i=(i+d+l.length)%l.length;S.dlg=l[i].id;const dg=$('#pdlg');renderDlg();const b=dg.querySelector('.db');if(b)b.scrollTop=0;}
 function render(){buildHmap();renderStatus();renderView();renderTable();renderPanel();renderNew();renderLegend();renderDlg();}
 
@@ -764,6 +806,10 @@ document.addEventListener('click',e=>{
   else if(a==='nmok')saveName();
   else if(a==='nmx'){S.dlgEdit=false;renderDlg();}
   else if(a==='covdlg')openCov(b.dataset.sid);
+  else if(a==='vdlg')openVac(n);
+  else if(a==='vx')$('#vdlg').close();
+  else if(a==='vnone'){S.vsel=new Set();renderVac();}
+  else if(a==='vok'){const vn=S.vn,w=cl(wk(vn)),ids=[...S.vsel];w.p=[...w.p.filter(i=>ids.includes(i)),...ids.filter(i=>!w.p.includes(i))];$('#vdlg').close();put('weeks/'+wid(vn),(w.p.length||w.b)?w:null);}
   else if(a==='covnone')$('#cdlg').querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);
   else if(a==='covx')$('#cdlg').close();
   else if(a==='covok'){const ids=[...$('#cdlg').querySelectorAll('input:checked')].map(x=>x.value);$('#cdlg').close();editSched(b.dataset.sid,d=>{d.cover=ids;});}
