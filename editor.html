@@ -455,7 +455,9 @@ const cat=id=>S.cfg.cats.find(c=>c.id===id)||S.cfg.cats[0];
 const grpOf=cid=>{const c=cat(cid);return c.grp||('own:'+c.id);};
 const zl=p=>{const a=zs(p);return a.length?a:['-'];};
 const poolOf=p=>{const g=grpOf(p.cat),cv=Array.isArray(p.cover)?p.cover:(p.cover?[p.cover]:[]);if(cv.some(i=>S.people[i]&&grpOf(S.people[i].cat)===g))return 'pool:'+p.name;const c=Object.values(S.people).find(q=>q!==p&&grpOf(q.cat)===g&&(Array.isArray(q.cover)?q.cover:(q.cover?[q.cover]:[])).some(i=>S.people[i]===p||(p.id&&i===p.id)));return c?'pool:'+c.name:'';};
-const clash=(p,q)=>grpOf(p.cat)===grpOf(q.cat)&&zl(p).some(z=>zl(q).includes(z))&&poolOf(p)===poolOf(q);
+const cvOf=x=>Array.isArray(x.cover)?x.cover:(x.cover?[x.cover]:[]);
+const pools=p=>{const o=new Set();if(cvOf(p).some(i=>S.people[i]))o.add(p.name);Object.values(S.people).forEach(q=>{if(q!==p&&cvOf(q).some(i=>S.people[i]===p||(p.id&&i===p.id)))o.add(q.name);});return o;};
+const clash=(p,q)=>{const a=pools(p);if([...pools(q)].some(k=>a.has(k)))return true;return grpOf(p.cat)===grpOf(q.cat)&&zl(p).some(z=>zl(q).includes(z))&&poolOf(p)===poolOf(q);};
 const schedOf=p=>{
   if(!p)return null;
   if(p.rot&&p.rot.cyc&&p.rot.cyc.length)return {k:'rot',cyc:p.rot.cyc,start:p.rot.start||0,from:p.rot.from||'09:00',to:p.rot.to||'17:00',from2:p.rot.from2||'',to2:p.rot.to2||'',from3:p.rot.from3||'',to3:p.rot.to3||'',mf:p.rot.mFrom||'08:30',mt:p.rot.mTo||'16:30',nf:p.rot.nFrom||'16:00',nt:p.rot.nTo||'00:00'};
@@ -787,7 +789,7 @@ function openVac(n){
   S.vn=n;S.vsel=new Set(wk(n).p.filter(i=>S.people[i]));S.vq='';
   const r=ROWS[n-1],fd=d=>pad(d.num)+'/'+pad(d.mo+1);
   const dg=$('#vdlg');
-  dg.innerHTML=`<div class="ch"><button type="button" data-act="vprev" aria-label="Semana anterior"${n<=2?' disabled':''}>‹</button><div id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona. Quien cubre a otros forma grupo aparte con ellos.</small></div><button type="button" data-act="vnext" aria-label="Semana siguiente"${n>=53?' disabled':''}>›</button></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
+  dg.innerHTML=`<div class="ch"><button type="button" data-act="vprev" aria-label="Semana anterior"${n<=2?' disabled':''}>‹</button><div id="vdlgT">Vacaciones · semana ${r.label}<small>${fd(r.days[0])} – ${fd(r.days[6])}/${r.days[6].y} · No pueden coincidir dos personas de la misma categoría (o grupo de exclusión) que compartan zona. Quien cubre a otros y sus cubiertos no pueden coincidir entre sí (de cualquier categoría) y van aparte del resto.</small></div><button type="button" data-act="vnext" aria-label="Semana siguiente"${n>=53?' disabled':''}>›</button></div><div class="vs"><input type="search" id="vq" placeholder="Buscar persona…" autocomplete="off"></div><div class="cb" id="vlist"></div><div class="cf"><span id="vcnt"></span><div><button type="button" class="btn ghost" data-act="vnone">Ninguno</button><button type="button" class="btn ghost" data-act="vx">Cancelar</button><button type="button" class="btn" data-act="vok">Guardar</button></div></div>`;
   renderVac();
   if(!dg.open){try{dg.showModal();}catch(e){dg.setAttribute('open','');}}
   const q=$('#vq');if(q)q.focus();
