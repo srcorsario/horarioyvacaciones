@@ -426,6 +426,7 @@ body.ro #addP,body.ro #addC,body.viewer .edonly{display:none!important}
 .wsheet td.nm{font-weight:600;background:#e6e6e6}
 .wsheet tr.zr td{background:#141C26;color:#fff;font:700 7pt var(--sans);letter-spacing:.06em;padding:.5mm 1mm}
 .wsheet td.k-l{background:#d4d4d4;color:#222}
+.wsheet td.k-b{background:#fff;color:#8C5A2B;font-weight:700}
 .wsheet td.k-v{background:#fff;color:#C8283C;font-weight:700}
 .wsheet td.k-w,.wsheet td.k-e{background:#fff}
 .wsheet td.k-m{background:#C6DAF3}.wsheet td.k-n{background:#F3D6DB}.wsheet td.k-x{background:#CDEBD5}.wsheet td.k-y{background:#DDD5F3}.wsheet td.k-z{background:#FBDDBF}
@@ -599,7 +600,23 @@ const curView=()=>{
 const curSched=()=>schedOf(S.people[curView()])||{k:'rot',cyc:STD,start:0,from:'09:00',to:'17:00'};
 const weekPat=(s,n)=>s.cyc[(s.start+n-1)%s.cyc.length];
 const typeOf=n=>{const s=schedAt(n);return s.k==='rot'?weekPat(s,n):hkey(s);};
-const subOf=(p,n)=>{if(!p||n<2)return null;const w=wk(n);const c=covs(p).find(i=>w.p.includes(i)&&schedOf(S.people[i]));if(c)return {q:{id:c,...S.people[c]},s:schedOf(S.people[c])};if(!p.sub)return null;const pid=Object.keys(S.people).find(k=>S.people[k]===p);const mz=zs(p);const q=people().find(q=>q.id!==pid&&!q.sub&&w.p.includes(q.id)&&zs(q).some(z=>mz.includes(z))&&schedOf(q));return q?{q,s:schedOf(q)}:null;};
+const carryIds=()=>{const c=String(S.cfg.carry||'').trim().toLowerCase();if(!c)return [];if(S.people[c])return [c];const ps=Object.entries(S.people);let m=ps.filter(([k,q])=>q.name.toLowerCase()===c);if(!m.length)m=ps.filter(([k,q])=>q.name.toLowerCase().split(/\s+/)[0]===c);if(!m.length)m=ps.filter(([k,q])=>q.name.toLowerCase().startsWith(c));return m.length===1?[m[0][0]]:[];};
+const vacIds=n=>n===1?carryIds():wk(n).p;
+const bajaOn=(p,n)=>{const b=p&&p.baja;if(!b)return false;return n>=(b.from||1)&&n<=(b.to||53);};
+const absIds=n=>{const a=new Set(vacIds(n));Object.entries(S.people).forEach(([k,q])=>{if(bajaOn(q,n))a.add(k);});return [...a];};
+function bajaEd(p,ro){const b=p.baja,dis=ro?' disabled':'',opt=(v,none)=>`<option value="">${none}</option>`+ROWS.map(r=>`<option value="${r.n}"${v===r.n?' selected':''}>Semana ${r.label}</option>`).join('');
+  return `<fieldset class="days" style="padding:10px 0 0;flex-direction:column;align-items:stretch;gap:6px"><legend>Baja</legend><label class="dchk"><input type="checkbox" data-bj="on" data-id="${p.id}"${b?' checked':''}${dis}><span>De baja (la cubre quien la tenga en «Cubre a» o un correturnos)</span></label>${b?`<label class="f" style="display:grid;gap:3px;font-size:12px;color:var(--muted)"><span>Desde</span><select data-bj="from" data-id="${p.id}" style="height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)"${dis}>${opt(b.from,'Desde siempre')}</select></label><label class="f" style="display:grid;gap:3px;font-size:12px;color:var(--muted)"><span>Hasta</span><select data-bj="to" data-id="${p.id}" style="height:32px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)"${dis}>${opt(b.to,'Sin fecha de vuelta')}</select></label>`:''}</fieldset>`;}
+document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.dataset.bj)return;e.stopImmediatePropagation();const id=t.dataset.id,p={...S.people[id]};
+  if(t.dataset.bj==='on'){if(t.checked)p.baja={};else delete p.baja;}
+  else{const b={...(p.baja||{})};if(t.value)b[t.dataset.bj]=Number(t.value);else delete b[t.dataset.bj];p.baja=b;}
+  put('people/'+id,p);},true);
+function assignWeek(n){
+  const vac=absIds(n).filter(i=>S.people[i]),res={},used=new Set(),done=new Set(),ps=people();
+  vac.forEach(v=>{if(!schedOf(S.people[v]))return;const c=ps.find(q=>!used.has(q.id)&&!vac.includes(q.id)&&covs(q).includes(v));if(c){res[c.id]=v;used.add(c.id);done.add(v);}});
+  vac.forEach(v=>{const vp=S.people[v];if(done.has(v)||vp.sub||!schedOf(vp))return;const c=ps.find(q=>q.sub&&!used.has(q.id)&&!vac.includes(q.id)&&zs(q).some(z=>zs(vp).includes(z)));if(c){res[c.id]=v;used.add(c.id);done.add(v);}});
+  return res;
+}
+const subOf=(p,n)=>{if(!p)return null;const pid=p.id&&S.people[p.id]?p.id:Object.keys(S.people).find(k=>S.people[k]===p);if(!pid)return null;const v=assignWeek(n)[pid];return v?{q:{id:v,...S.people[v]},s:schedOf(S.people[v])}:null;};
 const subOn=n=>subOf(S.people[curView()],n);
 const schedAt=n=>{const x=subOn(n);return x?x.s:curSched();};
 const covs=p=>(Array.isArray(p&&p.cover)?p.cover:(p&&p.cover?[p.cover]:[])).filter(i=>S.people[i]);
@@ -791,7 +808,7 @@ function renderTable(){
       const sb=subOn(n);const cv=sb?`<span class="covl">Cubre a ${esc(sb.q.name)}</span>`:'';
       vac=`<td class="vac"><div class="vin">${chips}${cv}${add}${lk}</div></td>`;
     }
-    if(w.p.includes(curView()))cls+=' vc';
+    if(vacIds(n).includes(curView()))cls+=' vc';
     vac=vac.replace('<td class="vac','<td class="vac'+rb);
     return `<tr class="${cls.trim()}"><td class="mo${lb}">${r.mlabel}</td><th class="wk${lb}" scope="row"${n===53?' title="Semana 1 de 2028"':''}>${r.label}</th>${cells}${vac}</tr>`;
   }).join('');
@@ -827,7 +844,7 @@ function renderPanel(){
     const sc=schedOf(p),c=cat(p.cat);
     const sum=(!sc?'Horario sin definir':sc.k==='rot'?(sc.cyc.join()===STD.join()?'Rota A-B-C · semana 1: '+'ABC'[sc.start]:'Rota · ciclo de '+sc.cyc.length+' semanas'):`${sc.from}-${sc.to} · libre ${sc.free.length?[...sc.free].sort((a,b)=>a-b).map(i=>DOW[i].toLowerCase()).join(', '):'ningún día'}`);
     const cv=covs(p).map(i=>S.people[i].name.split(' ')[0]);
-    return `<button type="button" class="schb sc2" data-act="pdlg" data-id="${p.id}"><b><i style="background:${c.color}"></i>${esc(p.name)}</b><span class="m">${esc(c.name)}${zs(p).length?' · '+esc(zs(p).join('+')):''}${p.sub?' · Correturnos':''}</span><span class="m">${esc(sum)}</span>${cv.length?`<span class="m">Cubre a ${esc(cv.join(', '))}</span>`:''}<em>${st.cnt[p.id]||0} sem. de vacaciones</em></button>`;
+    return `<button type="button" class="schb sc2" data-act="pdlg" data-id="${p.id}"><b><i style="background:${c.color}"></i>${esc(p.name)}</b><span class="m">${esc(c.name)}${zs(p).length?' · '+esc(zs(p).join('+')):''}${p.sub?' · Correturnos':''}${p.baja?' · <b style="color:var(--warn)">De baja</b>':''}</span><span class="m">${esc(sum)}</span>${cv.length?`<span class="m">Cubre a ${esc(cv.join(', '))}</span>`:''}<em>${st.cnt[p.id]||0} sem. de vacaciones</em></button>`;
   }).join('')+'</div></section>').join('')||'<p class="hint">Nadie con ese filtro.</p>';
   $('#exp').hidden=!dl;
 }
@@ -852,12 +869,12 @@ function editorHTML(sid,d,ro,ps){
   const dis=ro?' disabled':'',rot=d.mode==='rot';
   const cn=(d.cover||[]).filter(i=>S.people[i]).map(i=>S.people[i].name);
   const covH=`<div class="f"><span>Cubre a</span><button type="button" class="covb" data-act="covdlg" data-sid="${sid}"${dis}><span>${cn.length?esc(cn.join(', ')):'Nadie'}</span><b>${cn.length?cn.length+' · ':''}Elegir…</b></button></div>`;
-  const subc=`<label class="dchk" style="justify-self:start"><input type="checkbox" data-sf="sub" data-sid="${sid}"${d.sub?' checked':''}${dis}><span>Correturnos: en las semanas que alguien de su zona está de vacaciones, hace su horario</span></label>`;
+  const subc=`<label class="dchk" style="justify-self:start"><input type="checkbox" data-sf="sub" data-sid="${sid}"${d.sub?' checked':''}${dis}><span>Correturnos: en las semanas que alguien de su zona está de vacaciones o de baja, hace su horario</span></label>`;
   const head=subc+`<label class="f"><span>¿Rota por semanas?</span><select data-sf="mode" data-sid="${sid}"${dis}><option value="fx"${rot?'':' selected'}>No, repite la misma semana</option><option value="rot"${rot?' selected':''}>Sí, rota por semanas</option></select></label>`;
   const hrs=(!rot||d.cyc.some(w=>w.includes('x'))?`<div class="f2"><label class="f"><span>${rot?'Horario 1 · ':''}Entrada</span><input type="time" data-sf="from" data-sid="${sid}" value="${d.from}"${dis}></label><label class="f"><span>Salida</span><input type="time" data-sf="to" data-sid="${sid}" value="${d.to}"${dis}></label></div>`:'')+(rot&&d.cyc.some(w=>w.includes('y'))?`<div class="f2"><label class="f"><span>Horario 2 · Entrada</span><input type="time" data-sf="from2" data-sid="${sid}" value="${d.from2}"${dis}></label><label class="f"><span>Salida</span><input type="time" data-sf="to2" data-sid="${sid}" value="${d.to2}"${dis}></label></div>`:'')+(rot&&d.cyc.some(w=>w.includes('z'))?`<div class="f2"><label class="f"><span>Horario 3 · Entrada</span><input type="time" data-sf="from3" data-sid="${sid}" value="${d.from3}"${dis}></label><label class="f"><span>Salida</span><input type="time" data-sf="to3" data-sid="${sid}" value="${d.to3}"${dis}></label></div>`:'')+(rot&&d.cyc.some(w=>w.includes('m'))?`<div class="f2"><label class="f"><span>Horario mañana · Entrada</span><input type="time" data-sf="mFrom" data-sid="${sid}" value="${d.mFrom}"${dis}></label><label class="f"><span>Salida</span><input type="time" data-sf="mTo" data-sid="${sid}" value="${d.mTo}"${dis}></label></div>`:'')+(rot&&d.cyc.some(w=>w.includes('n'))?`<div class="f2"><label class="f"><span>Horario noche · Entrada</span><input type="time" data-sf="nFrom" data-sid="${sid}" value="${d.nFrom}"${dis}></label><label class="f"><span>Salida</span><input type="time" data-sf="nTo" data-sid="${sid}" value="${d.nTo}"${dis}></label></div>`:'');
   if(!rot){
     const days=DOW.map((n,i)=>`<label class="dchk"><input type="checkbox" data-sf="d${i}" data-sid="${sid}"${d.free.includes(i)?' checked':''}${dis}><span>${n}</span></label>`).join('');
-    return `<div class="ed">${head}${hrs}<fieldset class="days"><legend>Días libres</legend>${days}</fieldset>${covH}<p class="hint" style="margin:0">Si cubre a alguien, en las semanas de vacaciones de esa persona hace su horario.</p></div>`;
+    return `<div class="ed">${head}${hrs}<fieldset class="days"><legend>Días libres</legend>${days}</fieldset>${covH}<p class="hint" style="margin:0">Si cubre a alguien, en las semanas de vacaciones o baja de esa persona hace su horario.</p></div>`;
   }
   const hd=`<div class="cw hd"><span></span>${DOW.map(n=>`<span>${n}</span>`).join('')}</div>`;
   const rows=d.cyc.map((wp,i)=>`<div class="cw"><span class="cl">Sem. ${i+1}</span>${wp.split('').map((c,j)=>`<select class="cs ${c}" data-sf="c" data-sid="${sid}" data-w="${i}" data-d="${j}" aria-label="Semana ${i+1} del ciclo, ${DOW[j]}"${dis}>${CELL.map(([v,l])=>`<option value="${v}"${v===c?' selected':''}>${l}</option>`).join('')}</select>`).join('')}</div>`).join('');
@@ -896,7 +913,7 @@ function renderDlg(){
   const vw=ROWS.filter(r=>r.n>1&&wk(r.n).p.includes(p.id));
   const vac=`<section class="dv"><h4>Vacaciones asignadas · ${vw.length} semana${vw.length===1?'':'s'}</h4>${vw.length?`<ul>${vw.map(r=>`<li><span><b>Sem. ${r.label}</b> · ${fd(r.days[0])}–${fd(r.days[6])}</span>${ro?'':`<button type="button" data-act="rm" data-n="${r.n}" data-id="${p.id}" aria-label="Quitar la semana ${r.label}">×</button>`}</li>`).join('')}</ul>`:'<p class="hint" style="margin:0">Sin semanas asignadas. Añádelas desde la columna Vacaciones del calendario.</p>'}</section>`;
   const nmH=S.dlgEdit&&!ro?`<span class="nm"><input id="dlgName" value="${esc(p.name)}" maxlength="30" aria-label="Nombre"><button type="button" data-act="nmok" aria-label="Guardar nombre">✓</button><button type="button" data-act="nmx" aria-label="Cancelar">↺</button></span>`:`${esc(p.name)}${ro?'':`<button type="button" class="pen" data-act="nmed" aria-label="Editar nombre" title="Editar nombre">✎</button>`}`;
-  dg.innerHTML=`<div class="dh"><button type="button" data-act="dprev" aria-label="Persona anterior">‹</button><h3 id="pdlgT">${nmH}<small>${i>=0?(i+1)+' de '+list.length:''}${zs(p).length?' · '+esc(zTxt(p)):''}</small></h3><button type="button" data-act="dnext" aria-label="Persona siguiente">›</button><button type="button" data-act="dclose" aria-label="Cerrar">×</button></div><div class="db"><div class="c1">${zEd(p,ro)}</div><div class="c2">${editorHTML(p.id,dataOf(p),ro,ps)}</div><div class="c3">${vac}${ro?'':`<section class="dv"><button type="button" class="btn ghost pdel" data-act="pdel" data-id="${p.id}">${S.confirm===p.id?'¿Seguro? Pulsa otra vez para eliminar':'Eliminar persona'}</button></section>`}</div></div>`;
+  dg.innerHTML=`<div class="dh"><button type="button" data-act="dprev" aria-label="Persona anterior">‹</button><h3 id="pdlgT">${nmH}<small>${i>=0?(i+1)+' de '+list.length:''}${zs(p).length?' · '+esc(zTxt(p)):''}</small></h3><button type="button" data-act="dnext" aria-label="Persona siguiente">›</button><button type="button" data-act="dclose" aria-label="Cerrar">×</button></div><div class="db"><div class="c1">${zEd(p,ro)}${bajaEd(p,ro)}</div><div class="c2">${editorHTML(p.id,dataOf(p),ro,ps)}</div><div class="c3">${vac}${ro?'':`<section class="dv"><button type="button" class="btn ghost pdel" data-act="pdel" data-id="${p.id}">${S.confirm===p.id?'¿Seguro? Pulsa otra vez para eliminar':'Eliminar persona'}</button></section>`}</div></div>`;
   if(S.dlgEdit){const inp=dg.querySelector('#dlgName');if(inp){inp.focus();inp.select();}}
   const nb=dg.querySelector('.db');nb.scrollTop=st;[...nb.children].forEach((x,i)=>{if(cst[i])x.scrollTop=cst[i];});
   if(fid){const el=dg.querySelector(`[data-sf="${fid}"],[data-act="${fid}"]`);if(el)el.focus({preventScroll:true});}
@@ -906,7 +923,7 @@ function openCov(sid){
   const p=sid==='__new'?null:S.people[sid],d=sid==='__new'?(S.draft||(S.draft=newDraft())):dataOf(p),sel=new Set(d.cover||[]);
   const list=groups(people().filter(q=>q.id!==sid));
   const dg=$('#cdlg');
-  dg.innerHTML=`<div class="ch" id="cdlgT">Cubre a<small>${p?esc(p.name)+' · ':''}En las semanas de vacaciones de las personas marcadas hace su horario.</small></div><div class="cb">${list.map(g=>`<div class="zh"><span>${esc(zName(g.k))}</span></div>`+g.ps.map(q=>`<label><input type="checkbox" value="${q.id}"${sel.has(q.id)?' checked':''}><span>${esc(q.name)}</span></label>`).join('')).join('')}</div><div class="cf"><button type="button" class="btn ghost" data-act="covnone">Ninguno</button><button type="button" class="btn ghost" data-act="covx">Cancelar</button><button type="button" class="btn" data-act="covok" data-sid="${sid}">Aceptar</button></div>`;
+  dg.innerHTML=`<div class="ch" id="cdlgT">Cubre a<small>${p?esc(p.name)+' · ':''}En las semanas de vacaciones o baja de las personas marcadas hace su horario.</small></div><div class="cb">${list.map(g=>`<div class="zh"><span>${esc(zName(g.k))}</span></div>`+g.ps.map(q=>`<label><input type="checkbox" value="${q.id}"${sel.has(q.id)?' checked':''}><span>${esc(q.name)}</span></label>`).join('')).join('')}</div><div class="cf"><button type="button" class="btn ghost" data-act="covnone">Ninguno</button><button type="button" class="btn ghost" data-act="covx">Cancelar</button><button type="button" class="btn" data-act="covok" data-sid="${sid}">Aceptar</button></div>`;
   try{dg.showModal();}catch(e){dg.setAttribute('open','');}
 }
 function openVac(n){
@@ -935,8 +952,9 @@ document.addEventListener('change',e=>{const t=e.target;if(!t.dataset||!t.datase
 document.addEventListener('input',e=>{if(e.target.id==='vq'){S.vq=e.target.value;renderVac();}else if(e.target.id==='sq'){S.sq=e.target.value;renderPanel();}});
 const ZPRE={RG:'RG',PR:'COMEDOR',CH:'CH',CAF:'CAF',WB:'WB',US:'US_OP',DRG:'REST'};
 function dayCells(p,n){
-  const w=n===1?{p:[]}:wk(n),raw=S.people[p.id];
-  if(w.p.includes(p.id))return Array(7).fill({t:'VACACIONES',k:'v'});
+  const w={p:vacIds(n)},raw=S.people[p.id];
+  if(bajaOn(raw,n))return Array(7).fill({t:'BAJA',k:'b'});
+  if(w.p.includes(p.id))return [0,1,2,3,4,5,6].map(d=>d<5?{t:'VACACIONES',k:'v'}:{t:'DESCANSO',k:'l'});
   const x=subOf(raw,n),s=x?x.s:schedOf(raw),zq=x?x.q:p,cv=!!x;
   if(!s)return Array(7).fill({t:'',k:'e'});
   const pre=ZPRE[zs(zq)[0]]||'',hm=t=>String(t||'').replace(':',''),lab=(f,t)=>(pre?pre+'_':'')+hm(f)+'_'+hm(t);
